@@ -1,0 +1,62 @@
+# Node.js and React-related entries
+node_modules/
+npm-debug.log
+yarn-error.log
+.yarn-integrity
+
+# React build files
+/build
+/dist
+
+# Django-related entries
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info
+.eggs
+
+# Django Migrations
+**/migrations/
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE configurations (VS Code and PyCharm)
+.vscode/
+.idea/
+
+# macOS specific files
+.DS_Store
+
+# Log files
+*.log
+
+# Virtual Environment
+/venv
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+*.cover
+
+# Testing files
+.pytest_cache/
+nosetests.xml
+coverage/
+.tox/
+.cache
+*.cover
+.hypothesis/
+
+# Other
+*.sqlite3
+db.sqlite3
