@@ -19,3 +19,14 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
             instance.set_password(password)
         return super().update(instance, validated_data)
+
+    def validate(self, data):
+        email = data.get('email', None)
+        password = data.get('password', None)
+
+        if not email:
+            raise serializers.ValidationError("Email is required")
+        if not password:
+            raise serializers.ValidationError("Password is required")
+
+        return data

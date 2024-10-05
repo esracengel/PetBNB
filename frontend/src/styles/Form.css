@@ -4,7 +4,9 @@ form {
   max-width: 300px;
   margin: 0 auto;
 }
-
+h1 {
+  text-align: center;
+}
 form div {
   margin-bottom: 15px;
 }
@@ -14,19 +16,18 @@ label {
   margin-bottom: 5px;
 }
 
-input, select {
+input, select, button {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 button {
-  padding: 10px;
   background-color: #0066cc;
   color: white;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -40,14 +41,28 @@ button:hover {
   margin-top: 5px;
 }
 
-.password-strength {
-  font-size: 0.8em;
-  margin-top: 5px;
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.register-form {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.checkbox-container input[type="checkbox"] {
+  margin-right: 5px;
+  width: auto;
+}
+
+.checkbox-container label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.login-links {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-links a {
+  display: inline-block;
+  margin: 5px 0;
 }

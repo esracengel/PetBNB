@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import '../styles/Home.css';
 
 function Home() {
+  useEffect(() => {
+    document.title = "PetBnB - Home";
+  }, []);
+
   return (
-    <div>
-      <h1>Welcome to Paws Hub</h1>
-      <p>Find the perfect pet sitter or offer your services!</p>
+    <div className="home"> 
+      <h1>Welcome to PetBnB</h1>
+      <p>Find a sitter for your beloved...</p>
+      <img src="/luna.jpeg" alt="Luna" />
+      <p>This is Luna btw... She is not pleased...</p>
     </div>
   );
 }

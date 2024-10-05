@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -9,6 +9,10 @@ function Register() {
   const [submitResult, setSubmitResult] = useState(null);
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    document.title = "PetBnB - Register";
+  },[]);
   const initialValues = {
     email: '',
     username: '',
@@ -77,7 +81,7 @@ function Register() {
 
   return (
     <div>
-      <h1>Register</h1>
+      <h1>Registration</h1>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}

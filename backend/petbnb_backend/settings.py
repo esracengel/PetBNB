@@ -163,8 +163,11 @@ DJOSER = {
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
+    #TODO Change these in prod
+    'SEND_CONFIRMATION_EMAIL': False,
     'ACTIVATION_URL': 'activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
+    #
     'SERIALIZERS': {
         'user': 'users.serializers.UserSerializer',
         'user_create': 'users.serializers.UserSerializer'},
@@ -172,4 +175,5 @@ DJOSER = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-CORS_ALLOW_ALL_ORIGINS = True #FOR DEVELOPMENT ONLY
+CORS_ALLOW_ALL_ORIGINS = True  # For development only
+CORS_ALLOW_CREDENTIALS = True
