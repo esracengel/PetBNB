@@ -45,26 +45,60 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
         
+class ServiceOffersFilter(filters.FilterSet):
+    service_request = filters.NumberFilter(field_name='service_request__id')
+    caregiver = filters.NumberFilter(field_name='caregiver__id')
+
+    class Meta:
+        model = ServiceOffer
+        fields = ['service_request', 'caregiver']
 
 class ServiceOfferViewSet(viewsets.ModelViewSet):
     queryset = ServiceOffer.objects.all()
     serializer_class = ServiceOfferSerializer
     permission_classes = [IsCaregiverOrReadOnlyOrAdmin]
+    filterset_class = ServiceOffersFilter
+
 
     def get_queryset(self):
-        """
-        This view should return:
-        - All offers for admins
-        - Own offers for caregivers
-        - Offers for owned service requests for other users
-        """
         user = self.request.user
         if user.is_staff:
             return ServiceOffer.objects.all()
-        elif user.user_type =="caregiver":
+        elif user.user_type == "caregiver":
             return ServiceOffer.objects.filter(caregiver=user)
         else:
             return ServiceOffer.objects.filter(service_request__owner=user)
 
+    def create(self, request, *args, **kwargs):
+        service_request_id = request.data.get('service_request')
+        existing_offer = ServiceOffer.objects.filter(
+            service_request_id=service_request_id,
+            caregiver=request.user
+        ).first()
+
+        if existing_offer:
+            if existing_offer.status == 'rejected':
+                # If the existing offer was rejected, update it instead of creating a new one
+                serializer = self.get_serializer(existing_offer, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                self.perform_update(serializer)
+                return Response(serializer.data)
+            else:
+                return Response({"detail": "You have already made an offer for this request."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.caregiver != request.user:
+            return Response({"detail": "You can only update your own offers."}, status=status.HTTP_403_FORBIDDEN)
+        if instance.status not in ['pending', 'rejected']:
+            return Response({"detail": "You can only update pending or rejected offers."}, status=status.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
+
     def perform_create(self, serializer):
-        serializer.save(caregiver=self.request.user)
+        serializer.save(caregiver=self.request.user, status='pending')
+
+    def perform_update(self, serializer):
+        serializer.save(status='pending')
+        

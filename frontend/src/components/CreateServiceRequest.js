@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import '../styles/CreateServiceRequest.css';
+import '../styles/ServiceComponents.css';
 
 const CreateServiceRequest = ({ isOpen, onClose, onSubmit }) => {
-  if (!isOpen) return null;
 
   const petTypes = ['Cat', 'Dog', 'Bird', 'Fish', 'Turtle', 'Hamster'];
+  const [error, setError] = useState(null);
+  if (!isOpen) return null;
 
   const initialValues = {
     pet_type: '',
@@ -19,7 +20,7 @@ const CreateServiceRequest = ({ isOpen, onClose, onSubmit }) => {
 
   const validationSchema = Yup.object().shape({
     pet_type: Yup.string().required('Required'),
-    pet_breed: Yup.string().test('is-breed-required', 'Required for dogs', function(value) {
+    pet_breed: Yup.string().test('is-breed-required', 'Required for dogs', function (value) {
       return this.parent.pet_type !== 'Dog' || (this.parent.pet_type === 'Dog' && value);
     }),
     start_date: Yup.date().required('Required'),
@@ -32,15 +33,24 @@ const CreateServiceRequest = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    await onSubmit(values);
-    setSubmitting(false);
-    onClose();
+
+    try {
+      await onSubmit(values);
+      onClose();
+    } catch (error) {
+      console.error('Error submitting offer:', error);
+      setError(error.message || 'An error occurred while submitting the offer. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Create New Service Request</h2>
+        {error && <div className="error-message">{error}</div>}
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}

@@ -102,7 +102,6 @@
 .service-functions {
   display: flex;
   align-items:self-end;
-  max-width: 50%;
   justify-content: space-between;
   gap: 10px; /* Adds space between the link and the button */
   flex-wrap: nowrap;
@@ -120,13 +119,30 @@
   flex-grow: 2; 
   text-align: center;
   min-width: 30%;
+  max-width: 40%;
 }
 
-.service-functions button {
-  background-color: #dc3545;
+.delete-button {
+  background-color: #dc3545 !important;
+  
 }
 
 .service-functions a:hover, .service-functions button:hover {
-  opacity: 0.9; /* Add hover effect for both link and button */
+  opacity: 0.9; 
 }
 .right-align { margin-left: auto; }
+
+.make-offer-button {
+  background-color: #1ba5a5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.make-offer-button:hover {
+  background-color: #074949;
+  
+}

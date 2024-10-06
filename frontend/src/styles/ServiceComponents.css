@@ -75,7 +75,7 @@
   }
   
   .button-group button[type="submit"] {
-    background-color: #0066cc;
+    background-color: #1ba5a5;
     color: white;
   }
   
@@ -87,3 +87,28 @@
   .button-group button:hover {
     opacity: 0.8;
   }
+
+  .error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .modal-header {
+    background-color: #1ba5a5;
+    color: white;
+    padding: 10px 15px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 5px 5px 0 0;
+  }
+
+  .message-input {
+    height: 100px;
+    resize: vertical;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+

@@ -2,9 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ServiceRequestSummary from '../components/ServiceRequestSummary';
 import CreateServiceRequest from '../components/CreateServiceRequest';
+import CreateServiceOffer from '../components/CreateServiceOffer';
 import '../styles/Services.css';
 
 const Services = () => {
+  //Title and user
+  useEffect(() => {
+    document.title = "PetBnB - Services";
+    fetchServiceRequests();
+  }, []);
+  const { user } = useAuth();
+  //Requests and sorting/filtering
   const [serviceRequests, setServiceRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [filterCriteria, setFilterCriteria] = useState({
@@ -13,19 +21,19 @@ const Services = () => {
     startDate: '',
     endDate: '',
   });
-  const [sortCriteria, setSortCriteria] = useState('startDate');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { user } = useAuth();
-
   const petTypes = ['', 'Cat', 'Dog', 'Bird', 'Fish', 'Turtle', 'Hamster'];
+  const [sortCriteria, setSortCriteria] = useState('startDate');
 
-  useEffect(() => {
-    document.title = "PetBnB - Services";
-  },[]);
-  useEffect(() => {
-    fetchServiceRequests();
-  }, []);
+  //State of sub components
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
+  //Selected objects
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [userOffers, setUserOffers] = useState(null);
+
+  //SERVICE REQUEST QUERIES:
+  //1. Fetching all requests:
   const fetchServiceRequests = async () => {
     try {
       const response = await fetch('http://localhost:8000/services/service-requests/', {
@@ -45,6 +53,7 @@ const Services = () => {
     }
   };
 
+  //2. Sorting and Filtering requests
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilterCriteria({ ...filterCriteria, [name]: value });
@@ -54,29 +63,7 @@ const Services = () => {
     setSortCriteria(e.target.value);
   };
 
-  const handleCreateRequest = async (values) => {
-    try {
-      const response = await fetch('http://localhost:8000/services/service-requests/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify(values),
-      });
-      console.log(JSON.stringify(values));
-
-      if (response.ok) {
-        fetchServiceRequests();  // Refresh the list after creating a new request
-      } else {
-        console.error('Failed to create service request');
-      }
-    } catch (error) {
-      console.error('Error creating service request:', error);
-    }
-  };
-
-  useEffect(() => {
+  useEffect(() => { //Filtering and sorting fetched requests
     let filtered = [...serviceRequests];
     if (filterCriteria.petType) {
       filtered = filtered.filter(request => request.pet_type === filterCriteria.petType);
@@ -102,6 +89,169 @@ const Services = () => {
 
     setFilteredRequests(filtered);
   }, [serviceRequests, filterCriteria, sortCriteria]);
+
+  // REQUEST AND OFFER CRUD
+
+  //1. Creating a request
+  const handleCreateRequest = async (values) => {
+    try {
+      const response = await fetch('http://localhost:8000/services/service-requests/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        fetchServiceRequests();
+      } else {
+        console.error('Failed to create service request');
+      }
+    } catch (error) {
+      console.error('Error creating service request:', error);
+    }
+  };
+
+  //2. Deleting a request
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      if (!window.confirm('Are you sure you want to delete this service request?')) return;
+
+      const response = await fetch(`http://localhost:8000/services/service-requests/${requestId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      if (response.ok) {
+        setServiceRequests(prevRequests => prevRequests.filter(request => request.id !== requestId));
+        setFilteredRequests(prevRequests => prevRequests.filter(request => request.id !== requestId));
+      } else {
+        console.error('Failed to delete service request');
+      }
+    } catch (error) {
+      console.error('Error deleting service request:', error);
+    }
+  };
+
+  //3. Creating or updating an offer
+  const handleCreateOrUpdateOfferClicked = (request) =>
+  {
+    setIsOfferModalOpen(true);
+    setSelectedRequest(request);
+    fetchAllOffers();
+
+  }
+
+  const handleSubmitOffer = async (values, request, existingOffer, setExistingOffer) => {
+    try {
+      const url = existingOffer
+        ? `http://localhost:8000/services/service-offers/${existingOffer.id}/`
+        : 'http://localhost:8000/services/service-offers/';
+      const method = existingOffer ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          ...values,
+          caregiver: user.id,
+          service_request: request.id
+        }),
+      });
+
+      if (response.ok) {
+        console.log(existingOffer ? 'Offer updated successfully' : 'Offer created successfully');
+        fetchServiceRequests();
+        setIsOfferModalOpen(false);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to submit offer');
+      }
+    } catch (error) {
+      console.error('Error submitting offer:', error);
+      throw error;
+    }
+  };
+
+
+  //4. Deleting an offer
+  const handleDeleteOffer = async (offerId) => {
+    try {
+      if (!window.confirm('Are you sure you want to delete this service offer?')) return;
+
+      const response = await fetch(`http://localhost:8000/services/service-offers/${offerId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      if (response.ok) {
+        console.log('Offer deleted successfully');
+        fetchServiceRequests(); // Refresh the service requests to reflect the changes
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete service offer');
+      }
+    } catch (error) {
+      console.error('Error deleting offer:', error);
+      throw error;
+    }
+  };
+
+  const handleViewOffers = (request) => {
+    // TODO
+    console.log('Viewing offers for request:', request.id);
+  };
+
+  //5. Fetching existing offers
+  const fetchUserOffer = async (request) => {
+    if (user && user.user_type === 'caregiver') {
+      try {
+        const response = await fetch(`http://localhost:8000/services/service-offers/?service_request=${request.id}&caregiver=${user.id}`, {
+          headers: {
+            'Authorization': `JWT ${localStorage.getItem('accessToken')}`,
+          },
+        });
+        if (response.ok) {
+          const offers = await response.json();
+          if (offers.length > 0) {
+            return(offers[0]);
+          }
+          else {
+            return null;
+          }
+        }
+        else{
+          return null;
+        }
+      } catch (error) {
+        console.error('Error fetching user offer:', error);
+        return null;
+      }
+    }
+  };
+
+  const fetchAllOffers = async () => {
+    const offers = {};
+    for (const request of filteredRequests) {
+      let offer = await fetchUserOffer(request);
+      offers[request.id] = offer;
+    }
+    setUserOffers(offers);
+  };
+
+  useEffect(() => {
+    
+    fetchAllOffers();
+  }, [filteredRequests]);
+
 
   return (
     <div className="services-page">
@@ -148,13 +298,28 @@ const Services = () => {
       </div>
       <div className="service-requests-list">
         {filteredRequests.map(request => (
-          <ServiceRequestSummary key={request.id} request={request} />
+          <ServiceRequestSummary
+            key={request.id}
+            request={request}
+            existingOffer={userOffers[request.id]}
+            onDeleteRequest={handleDeleteRequest}
+            onCreateOrUpdateOffer={handleCreateOrUpdateOfferClicked}
+            onDeleteOffer={handleDeleteOffer}
+            onViewOffers = {handleViewOffers}
+          />
         ))}
       </div>
       <CreateServiceRequest
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateRequest}
+      />
+      <CreateServiceOffer
+        isOpen={isOfferModalOpen}
+        onClose={() => setIsOfferModalOpen(false)}
+        onSubmit={handleSubmitOffer}
+        serviceRequest={selectedRequest}
+        existingOffer={selectedRequest? userOffers[selectedRequest.id]: null}
       />
     </div>
   );

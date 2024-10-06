@@ -6,7 +6,7 @@ class ServiceRequest(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     pet_type = models.CharField(max_length=50)
-    pet_breed = models.CharField(max_length=50)
+    pet_breed = models.CharField(max_length=50, blank = True, null = True)
     location = models.CharField(max_length=100)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
