@@ -13,6 +13,7 @@ function Navigation() {
         {user ? (
           <>
             <li><Link to="/profile">Profile</Link></li>
+            <li><Link to = "/services">Services</Link></li>
             <li><a href="#" className="logout-link" onClick={(e) => { e.preventDefault(); logout(); }}>Logout</a></li>
           </>
         ) : (

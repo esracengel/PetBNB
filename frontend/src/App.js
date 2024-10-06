@@ -5,10 +5,11 @@ import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Services from './pages/Services';
+import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
 function App() {
-
   return (
     <AuthProvider>
       <Router>
@@ -18,6 +19,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route 
+              path="/services" 
+              element={
+                <PrivateRoute>
+                  <Services />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </div>
       </Router>

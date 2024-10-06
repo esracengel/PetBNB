@@ -1,6 +1,7 @@
 from django_filters import rest_framework as filters
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework import filters as drf_filters
+from rest_framework.response import Response
 from .models import ServiceRequest, ServiceOffer
 from .serializers import ServiceRequestSerializer, ServiceOfferSerializer
 from .permissions import IsPetOwnerOrReadOnlyOrAdmin, IsCaregiverOrReadOnlyOrAdmin
@@ -35,6 +36,14 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+        
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.owner != request.user and not request.user.is_staff:
+            return Response({"detail": "You do not have permission to delete this service request."},
+                            status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
         
 
 class ServiceOfferViewSet(viewsets.ModelViewSet):

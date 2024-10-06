@@ -3,12 +3,13 @@ from .models import ServiceRequest, ServiceOffer
 from users.serializers import UserSerializer
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
-    owner_username = serializers.CharField(source='owner.email', read_only=True)
+
+    owner_display_name = serializers.CharField(source='owner.display_name', read_only=True)
    
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'owner_username', 'start_date', 'end_date', 'pet_type', 'pet_breed', 'location', 'description', 'created_at', 'updated_at', 'is_active']
-        read_only_fields = ('owner_username', 'created_at', 'updated_at')
+        fields = ['id', 'start_date', 'end_date', 'pet_type', 'pet_breed', 'location', 'description', 'created_at', 'updated_at', 'is_active','owner_display_name', 'owner']
+        read_only_fields = ('created_at', 'updated_at', 'owner_display_name', 'owner')
         
 class ServiceOfferSerializer(serializers.ModelSerializer):
     caregiver_username = serializers.CharField(source='caregiver.email', read_only=True)

@@ -29,3 +29,7 @@ class User(AbstractUser):
         super().clean()
         if not self.email:
             raise ValidationError(_('The Email field must be set'))
+        
+    @property
+    def display_name(self):
+        return self.username or self.email.split('@')[0]
